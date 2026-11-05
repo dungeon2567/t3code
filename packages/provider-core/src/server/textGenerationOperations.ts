@@ -9,6 +9,7 @@ import type { ProviderTextGeneration } from "./textGeneration.ts";
 import {
   buildBranchNamePrompt,
   buildCommitMessagePrompt,
+  buildEnhancePromptPrompt,
   buildPrContentPrompt,
   buildReviewGuidePrompt,
   buildThreadTitlePrompt,
@@ -155,6 +156,22 @@ export function fromRunner(name: string, run: Runner): ProviderTextGeneration {
     };
   });
 
+  const enhancePrompt: ProviderTextGeneration["enhancePrompt"] = Effect.fn(`${name}.enhancePrompt`)(
+    function* (input) {
+      const generated = yield* run({
+        operation: "enhancePrompt",
+        cwd: input.cwd,
+        modelSelection: input.modelSelection,
+        ...buildEnhancePromptPrompt({
+          message: input.prompt,
+          previousPlan: input.previousPlan,
+          feedback: input.feedback,
+        }),
+      });
+      return { prompt: generated.prompt.trim() };
+    },
+  );
+
   const generateReviewGuide: ProviderTextGeneration["generateReviewGuide"] = Effect.fn(
     `${name}.generateReviewGuide`,
   )(function* (input) {
@@ -173,5 +190,6 @@ export function fromRunner(name: string, run: Runner): ProviderTextGeneration {
     generateBranchName,
     generateThreadTitle,
     generateReviewGuide,
+    enhancePrompt,
   } satisfies ProviderTextGeneration;
 }

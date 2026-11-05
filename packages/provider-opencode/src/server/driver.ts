@@ -1,4 +1,4 @@
-import { ProviderDriverKind } from "@t3tools/contracts";
+import { ProviderDriverKind, TextGenerationError } from "@t3tools/contracts";
 import { OpenCodeSettings } from "../settings.ts";
 import * as Digest from "effect/crypto/Digest";
 import * as SecureRandom from "effect/crypto/SecureRandom";
@@ -155,6 +155,13 @@ function selectOpenCodeRuntimeTextGeneration(
         v1: v1.generateReviewGuide(input),
         v2: v2.generateReviewGuide(input),
       }),
+    enhancePrompt: () =>
+      Effect.fail(
+        new TextGenerationError({
+          operation: "enhancePrompt",
+          detail: "OpenCode does not enhance prompts.",
+        }),
+      ),
   };
 }
 

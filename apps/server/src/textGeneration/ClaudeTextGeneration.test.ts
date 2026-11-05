@@ -203,6 +203,33 @@ it.layer(layerClaudeTextGenerationTest)("ClaudeTextGeneration", (it) => {
     ),
   );
 
+  it.effect("sends ASD-STE100 enhancement instructions and returns the enhanced prompt", () =>
+    withFakeClaudeEnv(
+      {
+        output: JSON.stringify({
+          structured_output: {
+            prompt: "Task description:\nFix the login.\n\nSteps:\n1. Open the file.",
+          },
+        }),
+        stdinMustContain: "ASD-STE100",
+      },
+      (textGeneration) =>
+        Effect.gen(function* () {
+          const enhanced = yield* textGeneration.enhancePrompt({
+            cwd: process.cwd(),
+            prompt: "fix the login",
+            modelSelection: {
+              instanceId: ProviderInstanceId.make("claudeAgent"),
+              model: SYNTHETIC_CLAUDE_STANDARD_MODEL,
+            },
+          });
+          expect(enhanced.prompt).toBe(
+            "Task description:\nFix the login.\n\nSteps:\n1. Open the file.",
+          );
+        }),
+    ),
+  );
+
   it.effect("runs Claude text generation with the configured CLAUDE_CONFIG_DIR", () =>
     Effect.gen(function* () {
       const path = yield* Path.Path;

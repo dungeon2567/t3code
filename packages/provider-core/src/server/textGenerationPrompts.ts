@@ -482,3 +482,39 @@ export function buildThreadTitlePrompt(input: ThreadTitlePromptInput) {
 
   return { prompt, outputSchema };
 }
+
+export function buildEnhancePromptPrompt(input: {
+  message: string;
+  previousPlan?: string | undefined;
+  feedback?: string | undefined;
+}) {
+  const revising = input.previousPlan !== undefined && input.feedback !== undefined;
+  const message = revising
+    ? `Previous plan:\n${input.previousPlan}\n\nRequested changes:\n${input.feedback}\n\nDraft prompt:\n${input.message}`
+    : input.message;
+  const prompt = buildPromptFromMessage({
+    instruction:
+      "You rewrite a draft prompt for a coding agent into ASD-STE100 Simplified Technical English.",
+    responseShape:
+      'Return a JSON object with key: prompt. The value is the rewritten prompt, with a "Task description:" paragraph followed by a "Steps:" numbered list.',
+    rules: [
+      "Write in English. If the draft is in another language, translate it.",
+      "Write sentences of 20 words or fewer. Use one instruction per sentence.",
+      "Use the active voice and the present tense.",
+      "Use one meaning for each word. Use the same word for the same thing.",
+      "Use common, simple words. Avoid idioms, slang, and phrasal verbs when one word has the same meaning.",
+      "Use must for a requirement, should for a recommendation, and may for an option.",
+      "Keep code, file names, commands, and identifiers exactly as written.",
+      "Keep every requirement from the draft. Do not add requirements the draft does not contain.",
+      ...(revising
+        ? ["Apply the requested changes to the previous plan. Keep the draft's requirements."]
+        : []),
+    ],
+    message,
+  });
+  const outputSchema = Schema.Struct({
+    prompt: Schema.String,
+  });
+
+  return { prompt, outputSchema };
+}

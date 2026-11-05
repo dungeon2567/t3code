@@ -289,6 +289,7 @@ function createTextGeneration(
         title: "Update workflow",
       }),
     generateReviewGuide: () => Effect.succeed({ stops: [] }),
+    enhancePrompt: () => Effect.succeed({ prompt: "" }),
     ...overrides,
   };
 
@@ -338,6 +339,7 @@ function createTextGeneration(
         ),
       ),
     generateReviewGuide: (input) => implementation.generateReviewGuide(input),
+    enhancePrompt: (input) => implementation.enhancePrompt(input),
   };
 }
 

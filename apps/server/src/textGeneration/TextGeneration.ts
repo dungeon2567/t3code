@@ -3,6 +3,8 @@ import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import type { ModelSelection, ProviderInstanceId } from "@t3tools/contracts";
 import {
+  ProviderDriverKind,
+  defaultInstanceIdForDriver,
   isProviderAvailable,
   isProviderTextGenerationCapable,
   resolveProjectProviderInstanceEnabled,
@@ -39,12 +41,22 @@ export class TextGeneration extends Context.Service<TextGeneration, ProviderText
   "t3/textGeneration/TextGeneration",
 ) {}
 
+/** Prompt enhancement always runs on Claude's default text-generation model (Haiku 5.5). */
+export const promptEnhancerModelSelection = (): ModelSelection => {
+  const driver = ProviderDriverKind.make("claudeAgent");
+  return {
+    instanceId: defaultInstanceIdForDriver(driver),
+    model: defaultTextGenerationModel(driver),
+  };
+};
+
 type TextGenerationOp =
   | "generateCommitMessage"
   | "generatePrContent"
   | "generateBranchName"
   | "generateThreadTitle"
-  | "generateReviewGuide";
+  | "generateReviewGuide"
+  | "enhancePrompt";
 
 const resolveInstance = (
   registry: ProviderInstanceRegistry.ProviderInstanceRegistry["Service"],
@@ -140,6 +152,11 @@ export const make = Effect.gen(function* () {
     generateBranchName: Effect.fn("TextGeneration.generateBranchName")(function (input) {
       return generate("generateBranchName", input.modelSelection, (service, modelSelection) =>
         service.generateBranchName({ ...input, modelSelection }),
+      );
+    }),
+    enhancePrompt: Effect.fn("TextGeneration.enhancePrompt")(function (input) {
+      return generate("enhancePrompt", input.modelSelection, (service, modelSelection) =>
+        service.enhancePrompt({ ...input, modelSelection }),
       );
     }),
     generateReviewGuide: Effect.fn("TextGeneration.generateReviewGuide")(function (input) {

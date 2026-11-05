@@ -349,11 +349,19 @@ export const makeMuseTextGeneration = Effect.fn("makeMuseTextGeneration")(functi
   });
   const generateReviewGuide: ProviderTextGeneration["generateReviewGuide"] = () =>
     Effect.fail(investigationUnsupported("generateReviewGuide", "Muse Code"));
+  const enhancePrompt: ProviderTextGeneration["enhancePrompt"] = () =>
+    Effect.fail(
+      new TextGenerationError({
+        operation: "enhancePrompt",
+        detail: "Muse Code does not enhance prompts.",
+      }),
+    );
   return {
     generateCommitMessage,
     generatePrContent,
     generateBranchName,
     generateThreadTitle,
     generateReviewGuide,
+    enhancePrompt,
   } satisfies ProviderTextGeneration;
 });

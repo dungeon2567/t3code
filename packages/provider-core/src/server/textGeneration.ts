@@ -97,6 +97,18 @@ export type ReviewGuideGenerationResult = Omit<
   "headSha" | "generatedAt" | "modelSelection"
 >;
 
+export interface EnhancePromptGenerationInput {
+  cwd: string;
+  prompt: string;
+  previousPlan?: string | undefined;
+  feedback?: string | undefined;
+  modelSelection: ModelSelection;
+}
+
+export interface EnhancePromptGenerationResult {
+  prompt: string;
+}
+
 export interface ProviderTextGeneration {
   readonly generateCommitMessage: (
     input: CommitMessageGenerationInput,
@@ -117,4 +129,8 @@ export interface ProviderTextGeneration {
   readonly generateReviewGuide: (
     input: ReviewGuideGenerationInput,
   ) => Effect.Effect<ReviewGuideGenerationResult, TextGenerationError>;
+
+  readonly enhancePrompt: (
+    input: EnhancePromptGenerationInput,
+  ) => Effect.Effect<EnhancePromptGenerationResult, TextGenerationError>;
 }

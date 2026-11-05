@@ -231,6 +231,10 @@
       "types": "./src/state/environmentHttpAuth.ts",
       "default": "./src/state/environmentHttpAuth.ts"
     },
+    "./state/promptEnhancer": {
+      "types": "./src/state/promptEnhancer.ts",
+      "default": "./src/state/promptEnhancer.ts"
+    },
     "./state/peerPairingCode": {
       "types": "./src/state/peerPairingCode.ts",
       "default": "./src/state/peerPairingCode.ts"

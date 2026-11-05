@@ -203,6 +203,8 @@ import {
 } from "./ComposerAttachmentStrip";
 import { ComposerPrimaryActions } from "./ComposerPrimaryActions";
 import { ComposerFooterPrimaryActions } from "./ComposerFooterControls";
+import { ComposerEnhancePromptButton, ComposerPromptPlanPanel } from "./ComposerPromptPlan";
+import { usePromptPlan } from "./usePromptPlan";
 import { ComposerPendingUserInputPanel } from "./ComposerPendingUserInputPanel";
 import { ComposerPlanFollowUpBanner } from "./ComposerPlanFollowUpBanner";
 import { resolveComposerMenuActiveItemId } from "./composerMenuHighlight";
@@ -1266,6 +1268,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
   const setPrompt = (nextPrompt: string) => {
     setComposerDraftPrompt(composerDraftTarget, nextPrompt);
   };
+  const promptPlan = usePromptPlan({ environmentId, cwd: gitCwd });
 
   const addComposerImage = (image: ComposerImageAttachment) =>
     addComposerDraftImages(attachmentDraftTarget, [image]);
@@ -3466,6 +3469,18 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
               message={providerInputSubmissionError ?? composerSubmissionError}
             />
 
+            <ComposerPromptPlanPanel
+              plan={promptPlan.plan}
+              running={promptPlan.running}
+              error={promptPlan.error}
+              onApprove={(text) => {
+                setPrompt(text);
+                promptPlan.discard();
+              }}
+              onRequestChanges={(feedback) => void promptPlan.requestChanges(feedback)}
+              onDiscard={promptPlan.discard}
+            />
+
             {isComposerCollapsedMobile ? null : (
               <div
                 data-chat-composer-footer="true"
@@ -3476,6 +3491,13 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                 )}
               >
                 {composerAttachButton ? <div className="me-2">{composerAttachButton}</div> : null}
+                <div className="me-2">
+                  <ComposerEnhancePromptButton
+                    disabled={gitCwd === null || prompt.trim().length === 0}
+                    running={promptPlan.running}
+                    onStart={() => void promptPlan.start(prompt)}
+                  />
+                </div>
                 <div
                   data-chat-composer-actions="right"
                   data-chat-composer-transition-actions="true"
